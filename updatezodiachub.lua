@@ -1,4 +1,4 @@
--- [[ ZODIAC HUB - V6 FIXED KEY SYSTEM + SIDEBAR MENU ]] --
+-- [[ ZODIAC HUB - V5 FULL ESP + SIDEBAR MENU ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -20,7 +20,7 @@ ZodiacGui.Parent = (gethui and gethui()) or CoreGui
 local Theme = {
     Bg = Color3.fromRGB(15, 17, 26),
     CardBg = Color3.fromRGB(21, 25, 38),
-    SidebarBg = Color3.fromRGB(17, 19, 28),
+    SidebarBg = Color3.fromRGB(17, 19, 28), -- Yeni menü arka plan rengi
     Accent = Color3.fromRGB(88, 101, 242),
     TextPrimary = Color3.fromRGB(240, 242, 250),
     TextSecondary = Color3.fromRGB(130, 135, 155),
@@ -33,127 +33,12 @@ local Theme = {
 local function corner(p, r) local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, r or 8); c.Parent = p end
 
 -- =======================================================
--- 1) LOADING EKRANI
--- =======================================================
-local LoadFrame = Instance.new("Frame")
-LoadFrame.Size = UDim2.new(0, 300, 0, 120)
-LoadFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
-LoadFrame.BackgroundColor3 = Theme.Bg
-LoadFrame.Parent = ZodiacGui
-corner(LoadFrame, 12)
-
-local LoadTitle = Instance.new("TextLabel")
-LoadTitle.Size = UDim2.new(1, 0, 0, 40)
-LoadTitle.Position = UDim2.new(0, 0, 0, 20)
-LoadTitle.BackgroundTransparency = 1
-LoadTitle.Text = "Z O D I A C"
-LoadTitle.TextColor3 = Theme.TextPrimary
-LoadTitle.TextSize = 24
-LoadTitle.Font = Enum.Font.GothamBold
-LoadTitle.Parent = LoadFrame
-
-local LoadBarBg = Instance.new("Frame")
-LoadBarBg.Size = UDim2.new(0, 240, 0, 6)
-LoadBarBg.Position = UDim2.new(0.5, -120, 0, 80)
-LoadBarBg.BackgroundColor3 = Theme.CardBg
-LoadBarBg.Parent = LoadFrame
-corner(LoadBarBg, 3)
-
-local LoadBarFill = Instance.new("Frame")
-LoadBarFill.Size = UDim2.new(0, 0, 1, 0)
-LoadBarFill.BackgroundColor3 = Theme.Accent
-LoadBarFill.Parent = LoadBarBg
-corner(LoadBarFill, 3)
-
--- =======================================================
--- 2) ESKİYE DÖNDÜRÜLEN KEY SİSTEMİ EKRANI
--- =======================================================
-local KeyFrame = Instance.new("Frame")
-KeyFrame.Size = UDim2.new(0, 420, 0, 220)
-KeyFrame.Position = UDim2.new(0.5, -210, 0.5, -110)
-KeyFrame.BackgroundColor3 = Theme.Bg
-KeyFrame.Visible = false
-KeyFrame.Parent = ZodiacGui
-corner(KeyFrame, 12)
-
-local kPad = Instance.new("UIPadding")
-kPad.PaddingTop = UDim.new(0, 24); kPad.PaddingBottom = UDim.new(0, 24)
-kPad.PaddingLeft = UDim.new(0, 24); kPad.PaddingRight = UDim.new(0, 24)
-kPad.Parent = KeyFrame
-
-local AccessLbl = Instance.new("TextLabel")
-AccessLbl.Size = UDim2.new(1, 0, 0, 14)
-AccessLbl.BackgroundTransparency = 1
-AccessLbl.Text = "ZODIAC ACCESS"
-AccessLbl.TextColor3 = Theme.TextSecondary
-AccessLbl.TextSize = 10
-AccessLbl.Font = Enum.Font.GothamBold
-AccessLbl.TextXAlignment = Enum.TextXAlignment.Left
-AccessLbl.Parent = KeyFrame
-
-local TitleLbl = Instance.new("TextLabel")
-TitleLbl.Size = UDim2.new(1, 0, 0, 28)
-TitleLbl.Position = UDim2.new(0, 0, 0, 18)
-TitleLbl.BackgroundTransparency = 1
-TitleLbl.Text = "Enter key to unlock menu"
-TitleLbl.TextColor3 = Theme.TextPrimary
-TitleLbl.TextSize = 22
-TitleLbl.Font = Enum.Font.GothamBold
-TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-TitleLbl.Parent = KeyFrame
-
-local DescLbl = Instance.new("TextLabel")
-DescLbl.Size = UDim2.new(1, 0, 0, 16)
-DescLbl.Position = UDim2.new(0, 0, 0, 50)
-DescLbl.BackgroundTransparency = 1
-DescLbl.Text = "Main panel appears after successful key check."
-DescLbl.TextColor3 = Theme.TextSecondary
-DescLbl.TextSize = 13
-DescLbl.Font = Enum.Font.Gotham
-DescLbl.TextXAlignment = Enum.TextXAlignment.Left
-DescLbl.Parent = KeyFrame
-
-local InputBg = Instance.new("Frame")
-InputBg.Size = UDim2.new(1, 0, 0, 44)
-InputBg.Position = UDim2.new(0, 0, 0, 85)
-InputBg.BackgroundColor3 = Theme.InputBg
-InputBg.Parent = KeyFrame
-corner(InputBg, 8)
-
-local KeyInput = Instance.new("TextBox")
-KeyInput.Size = UDim2.new(1, -30, 1, 0)
-KeyInput.Position = UDim2.new(0, 15, 0, 0)
-KeyInput.BackgroundTransparency = 1
-KeyInput.Text = ""
-KeyInput.PlaceholderText = "Enter access key (e.g. ZodiacHub)"
-KeyInput.PlaceholderColor3 = Theme.TextSecondary
-KeyInput.TextColor3 = Theme.TextPrimary
-KeyInput.TextSize = 13
-KeyInput.Font = Enum.Font.Gotham
-KeyInput.TextXAlignment = Enum.TextXAlignment.Left
-KeyInput.ClearTextOnFocus = false
-KeyInput.Parent = InputBg
-
-local VerifyBtn = Instance.new("TextButton")
-VerifyBtn.Size = UDim2.new(0, 120, 0, 38)
-VerifyBtn.AnchorPoint = Vector2.new(1, 1)
-VerifyBtn.Position = UDim2.new(1, 0, 1, 0)
-VerifyBtn.BackgroundColor3 = Theme.Accent
-VerifyBtn.Text = "Unlock"
-VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-VerifyBtn.TextSize = 14
-VerifyBtn.Font = Enum.Font.GothamBold
-VerifyBtn.Parent = KeyFrame
-corner(VerifyBtn, 8)
-
--- =======================================================
 -- ANA ÇERÇEVE
 -- =======================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 880, 0, 560)
 MainFrame.Position = UDim2.new(0.5, -440, 0.5, -280)
 MainFrame.BackgroundColor3 = Theme.Bg
-MainFrame.Visible = false
 MainFrame.Parent = ZodiacGui
 corner(MainFrame, 12)
 
@@ -171,39 +56,9 @@ local function makeDraggable(frame)
     UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
 end
 makeDraggable(MainFrame)
-makeDraggable(KeyFrame)
-
--- Yükleme Animasyonu
-task.spawn(function()
-    local tween = TweenService:Create(LoadBarFill, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
-    tween:Play()
-    tween.Completed:Wait()
-    task.wait(0.3)
-    LoadFrame.Visible = false
-    KeyFrame.Visible = true
-end)
-
-VerifyBtn.MouseButton1Click:Connect(function()
-    if KeyInput.Text == "ZodiacHub" then
-        VerifyBtn.Text = "Success!"
-        VerifyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-        task.wait(0.5)
-        KeyFrame.Visible = false
-        MainFrame.Visible = true
-    else
-        local oldText = VerifyBtn.Text
-        local oldColor = VerifyBtn.BackgroundColor3
-        VerifyBtn.Text = "Invalid"
-        VerifyBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
-        task.wait(1)
-        VerifyBtn.Text = oldText
-        VerifyBtn.BackgroundColor3 = oldColor
-        KeyInput.Text = ""
-    end
-end)
 
 -- =======================================================
--- ÜST ARAMA ÇUBUĞU
+-- ÜST ARAMA ÇUBUĞU (Görseldeki gibi)
 -- =======================================================
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, -220, 0, 60)
@@ -230,7 +85,7 @@ SearchInput.TextXAlignment = Enum.TextXAlignment.Left
 SearchInput.Parent = SearchBox
 
 -- =======================================================
--- YAN MENÜ (SIDEBAR)
+-- YENİ YAN MENÜ (SIDEBAR) SİSTEMİ
 -- =======================================================
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0, 210, 1, 0)
@@ -238,6 +93,7 @@ Sidebar.BackgroundColor3 = Theme.SidebarBg
 Sidebar.Parent = MainFrame
 corner(Sidebar, 12)
 
+-- Menü ile içerik arasındaki ayrım çizgisi (Görseldeki gibi)
 local SidebarLine = Instance.new("Frame")
 SidebarLine.Size = UDim2.new(0, 1, 1, 0)
 SidebarLine.Position = UDim2.new(1, 0, 0, 0)
@@ -245,8 +101,9 @@ SidebarLine.BackgroundColor3 = Theme.CardBg
 SidebarLine.BorderSizePixel = 0
 SidebarLine.Parent = Sidebar
 
+-- Profil / Başlık Kutusu (Görsel 15'teki "LN - Lenzo Menu" kısmı)
 local ProfileBox = Instance.new("Frame")
-ProfileBox.Size = UDim2.new(1, -30, 0, 50)
+ProfileBox.Size = UDim2.new(1, 40, 0, 50)
 ProfileBox.Position = UDim2.new(0, 15, 0, 15)
 ProfileBox.BackgroundColor3 = Theme.Bg
 ProfileBox.Parent = Sidebar
@@ -262,25 +119,25 @@ corner(AvatarCircle, 16)
 local AvatarText = Instance.new("TextLabel")
 AvatarText.Size = UDim2.new(1, 0, 1, 0)
 AvatarText.BackgroundTransparency = 1
-AvatarText.Text = "LN"
+AvatarText.Text = "ZH"
 AvatarText.TextColor3 = Theme.TextPrimary
 AvatarText.TextSize = 14
 AvatarText.Font = Enum.Font.GothamBold
 AvatarText.Parent = AvatarCircle
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -55, 0, 18)
+Title.Size = UDim2.new(1, -60, 0, 18)
 Title.Position = UDim2.new(0, 50, 0, 8)
 Title.BackgroundTransparency = 1
-Title.Text = "Lenzo Menu"
+Title.Text = "Zodiac Menu"
 Title.TextColor3 = Theme.TextPrimary
-Title.TextSize = 14
+Title.TextSize = 15
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = ProfileBox
 
 local SubTitle = Instance.new("TextLabel")
-SubTitle.Size = UDim2.new(1, -55, 0, 14)
+SubTitle.Size = UDim2.new(1, -60, 0, 14)
 SubTitle.Position = UDim2.new(0, 50, 0, 26)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Text = "Panel Controls"
@@ -290,6 +147,7 @@ SubTitle.Font = Enum.Font.Gotham
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
 SubTitle.Parent = ProfileBox
 
+-- Menü Kaydırma Alanı
 local MenuScroll = Instance.new("ScrollingFrame")
 MenuScroll.Size = UDim2.new(1, 0, 1, -85)
 MenuScroll.Position = UDim2.new(0, 0, 0, 85)
@@ -327,6 +185,8 @@ local function createCategoryHeader(text)
 end
 
 local Tabs = {}
+local TabFrames = {}
+
 local ContentContainer = Instance.new("Frame")
 ContentContainer.Size = UDim2.new(1, -210, 1, -60)
 ContentContainer.Position = UDim2.new(0, 210, 0, 60)
@@ -338,11 +198,12 @@ local function createTab(name)
     btn.Size = UDim2.new(1, -20, 0, 36)
     btn.Position = UDim2.new(0, 10, 0, 0)
     btn.BackgroundColor3 = Theme.TabActiveBg
-    btn.BackgroundTransparency = 1
+    btn.BackgroundTransparency = 1 -- Varsayılan görünmez
     btn.Text = ""
     btn.Parent = MenuScroll
     corner(btn, 6)
     
+    -- Kenar Boşluğu için Padding eklentisi
     local btnPad = Instance.new("UIPadding")
     btnPad.PaddingLeft = UDim.new(0, 10)
     btnPad.Parent = btn
@@ -365,6 +226,7 @@ local function createTab(name)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = btn
 
+    -- Bu sekmeye ait sayfa
     local page = Instance.new("ScrollingFrame")
     page.Size = UDim2.new(1, -20, 1, -20)
     page.Position = UDim2.new(0, 10, 0, 10)
@@ -409,6 +271,7 @@ local function createTab(name)
     return tabData
 end
 
+-- Menü Öğelerini Oluşturma (Görsel 15 ile birebir aynı sıra)
 createCategoryHeader("Menu")
 createTab("MAIN")
 local espTab = createTab("ESP")
@@ -423,9 +286,10 @@ createTab("Misc")
 createTab("World")
 
 createCategoryHeader("Actions")
+-- (Boş bırakıldı, ileride eklenebilir)
 
 -- =======================================================
--- ESP KARTLARI
+-- ESP KARTLARI (Hiçbir şeye dokunulmadı, espTab içine eklendi)
 -- =======================================================
 local LeftCol = espTab.Left
 local RightCol = espTab.Right
@@ -688,6 +552,7 @@ addToggle(nameEsp, "Show Distance", true, function(v) ESP.Name.ShowDist = v end)
 addDropdown(nameEsp, "Distance Unit", {"studs", "meters"}, 1, function(v) ESP.Name.Unit = v end)
 addSlider(nameEsp, "Text Size", 10, 30, 14, "", function(v) ESP.Name.TextSize = v end)
 
+-- ESP Sekmesini Başlangıçta Aktif Yap
 for tName, data in pairs(Tabs) do
     if tName == "ESP" then
         data.Btn.BackgroundTransparency = 0
@@ -698,7 +563,7 @@ for tName, data in pairs(Tabs) do
 end
 
 -- =======================================================
--- ESP ÇİZİM MOTORU
+-- ESP ÇİZİM MOTORU (Değiştirilmedi)
 -- =======================================================
 local ESP_Drawings = {}
 local function createDrawings(player)
