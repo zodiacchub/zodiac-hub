@@ -1,4 +1,4 @@
--- [[ ZODIAC HUB - V4 FULL ESP + MODERN KEY SYSTEM ]] --
+-- [[ ZODIAC HUB - V5 FULL ESP + SIDEBAR MENU ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -20,143 +20,29 @@ ZodiacGui.Parent = (gethui and gethui()) or CoreGui
 local Theme = {
     Bg = Color3.fromRGB(15, 17, 26),
     CardBg = Color3.fromRGB(21, 25, 38),
-    SidebarBg = Color3.fromRGB(11, 13, 20),
-    Accent = Color3.fromRGB(88, 101, 242), -- Fotoğraftaki Mavi Tonu
+    SidebarBg = Color3.fromRGB(17, 19, 28), -- Yeni menü arka plan rengi
+    Accent = Color3.fromRGB(88, 101, 242),
     TextPrimary = Color3.fromRGB(240, 242, 250),
     TextSecondary = Color3.fromRGB(130, 135, 155),
     InputBg = Color3.fromRGB(24, 27, 38),
-    ToggleOff = Color3.fromRGB(38, 43, 62)
+    ToggleOff = Color3.fromRGB(38, 43, 62),
+    TabInactive = Color3.fromRGB(130, 135, 155),
+    TabActiveBg = Color3.fromRGB(25, 29, 43)
 }
 
 local function corner(p, r) local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, r or 8); c.Parent = p end
 
 -- =======================================================
--- 1) LOADING EKRANI
--- =======================================================
-local LoadFrame = Instance.new("Frame")
-LoadFrame.Size = UDim2.new(0, 300, 0, 120)
-LoadFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
-LoadFrame.BackgroundColor3 = Theme.Bg
-LoadFrame.Parent = ZodiacGui
-corner(LoadFrame, 12)
-
-local LoadTitle = Instance.new("TextLabel")
-LoadTitle.Size = UDim2.new(1, 0, 0, 40)
-LoadTitle.Position = UDim2.new(0, 0, 0, 20)
-LoadTitle.BackgroundTransparency = 1
-LoadTitle.Text = "Z O D I A C"
-LoadTitle.TextColor3 = Theme.TextPrimary
-LoadTitle.TextSize = 24
-LoadTitle.Font = Enum.Font.GothamBold
-LoadTitle.Parent = LoadFrame
-
-local LoadBarBg = Instance.new("Frame")
-LoadBarBg.Size = UDim2.new(0, 240, 0, 6)
-LoadBarBg.Position = UDim2.new(0.5, -120, 0, 80)
-LoadBarBg.BackgroundColor3 = Theme.CardBg
-LoadBarBg.Parent = LoadFrame
-corner(LoadBarBg, 3)
-
-local LoadBarFill = Instance.new("Frame")
-LoadBarFill.Size = UDim2.new(0, 0, 1, 0)
-LoadBarFill.BackgroundColor3 = Theme.Accent
-LoadBarFill.Parent = LoadBarBg
-corner(LoadBarFill, 3)
-
--- =======================================================
--- 2) YENİ MODERN KEY SİSTEMİ EKRANI (FOTO 1 İLE AYNI)
--- =======================================================
-local KeyFrame = Instance.new("Frame")
-KeyFrame.Size = UDim2.new(0, 420, 0, 220)
-KeyFrame.Position = UDim2.new(0.5, -210, 0.5, -110)
-KeyFrame.BackgroundColor3 = Theme.Bg
-KeyFrame.Visible = false
-KeyFrame.Parent = ZodiacGui
-corner(KeyFrame, 12)
-
-local kPad = Instance.new("UIPadding")
-kPad.PaddingTop = UDim.new(0, 24); kPad.PaddingBottom = UDim.new(0, 24)
-kPad.PaddingLeft = UDim.new(0, 24); kPad.PaddingRight = UDim.new(0, 24)
-kPad.Parent = KeyFrame
-
-local AccessLbl = Instance.new("TextLabel")
-AccessLbl.Size = UDim2.new(1, 0, 0, 14)
-AccessLbl.BackgroundTransparency = 1
-AccessLbl.Text = "ZODIAC ACCESS"
-AccessLbl.TextColor3 = Theme.TextSecondary
-AccessLbl.TextSize = 10
-AccessLbl.Font = Enum.Font.GothamBold
-AccessLbl.TextXAlignment = Enum.TextXAlignment.Left
-AccessLbl.Parent = KeyFrame
-
-local TitleLbl = Instance.new("TextLabel")
-TitleLbl.Size = UDim2.new(1, 0, 0, 28)
-TitleLbl.Position = UDim2.new(0, 0, 0, 18)
-TitleLbl.BackgroundTransparency = 1
-TitleLbl.Text = "Enter key to unlock menu"
-TitleLbl.TextColor3 = Theme.TextPrimary
-TitleLbl.TextSize = 22
-TitleLbl.Font = Enum.Font.GothamBold
-TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-TitleLbl.Parent = KeyFrame
-
-local DescLbl = Instance.new("TextLabel")
-DescLbl.Size = UDim2.new(1, 0, 0, 16)
-DescLbl.Position = UDim2.new(0, 0, 0, 50)
-DescLbl.BackgroundTransparency = 1
-DescLbl.Text = "Main panel appears after successful key check."
-DescLbl.TextColor3 = Theme.TextSecondary
-DescLbl.TextSize = 13
-DescLbl.Font = Enum.Font.Gotham
-DescLbl.TextXAlignment = Enum.TextXAlignment.Left
-DescLbl.Parent = KeyFrame
-
-local InputBg = Instance.new("Frame")
-InputBg.Size = UDim2.new(1, 0, 0, 44)
-InputBg.Position = UDim2.new(0, 0, 0, 85)
-InputBg.BackgroundColor3 = Theme.InputBg
-InputBg.Parent = KeyFrame
-corner(InputBg, 8)
-
--- Gerçek InputBox (Noktasız, net gözüken metin)
-local KeyInput = Instance.new("TextBox")
-KeyInput.Size = UDim2.new(1, -30, 1, 0)
-KeyInput.Position = UDim2.new(0, 15, 0, 0)
-KeyInput.BackgroundTransparency = 1
-KeyInput.Text = ""
-KeyInput.PlaceholderText = "Enter access key (e.g. ZodiacHub)"
-KeyInput.PlaceholderColor3 = Theme.TextSecondary
-KeyInput.TextColor3 = Theme.TextPrimary
-KeyInput.TextSize = 13
-KeyInput.Font = Enum.Font.Gotham
-KeyInput.TextXAlignment = Enum.TextXAlignment.Left
-KeyInput.ClearTextOnFocus = false
-KeyInput.Parent = InputBg
-
-local VerifyBtn = Instance.new("TextButton")
-VerifyBtn.Size = UDim2.new(0, 120, 0, 38)
-VerifyBtn.AnchorPoint = Vector2.new(1, 1)
-VerifyBtn.Position = UDim2.new(1, 0, 1, 0)
-VerifyBtn.BackgroundColor3 = Theme.Accent
-VerifyBtn.Text = "Unlock"
-VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-VerifyBtn.TextSize = 14
-VerifyBtn.Font = Enum.Font.GothamBold
-VerifyBtn.Parent = KeyFrame
-corner(VerifyBtn, 8)
-
--- =======================================================
--- 3) ANA MENÜ
+-- ANA ÇERÇEVE
 -- =======================================================
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 840, 0, 520)
-MainFrame.Position = UDim2.new(0.5, -420, 0.5, -260)
+MainFrame.Size = UDim2.new(0, 880, 0, 560)
+MainFrame.Position = UDim2.new(0.5, -440, 0.5, -280)
 MainFrame.BackgroundColor3 = Theme.Bg
-MainFrame.Visible = false
 MainFrame.Parent = ZodiacGui
 corner(MainFrame, 12)
 
--- Sürükleme Sistemi
+-- Sürükleme
 local function makeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; dragStart = input.Position; startPos = frame.Position end end)
@@ -170,100 +56,248 @@ local function makeDraggable(frame)
     UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
 end
 makeDraggable(MainFrame)
-makeDraggable(KeyFrame)
-
--- Geçiş Animasyonu
-task.spawn(function()
-    local tween = TweenService:Create(LoadBarFill, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
-    tween:Play()
-    tween.Completed:Wait()
-    task.wait(0.3)
-    LoadFrame.Visible = false
-    KeyFrame.Visible = true
-end)
-
-VerifyBtn.MouseButton1Click:Connect(function()
-    if KeyInput.Text == "ZodiacHub" then
-        VerifyBtn.Text = "Success!"
-        VerifyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-        task.wait(0.5)
-        KeyFrame.Visible = false
-        MainFrame.Visible = true
-    else
-        local oldText = VerifyBtn.Text
-        local oldColor = VerifyBtn.BackgroundColor3
-        VerifyBtn.Text = "Invalid"
-        VerifyBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
-        task.wait(1)
-        VerifyBtn.Text = oldText
-        VerifyBtn.BackgroundColor3 = oldColor
-        KeyInput.Text = ""
-    end
-end)
 
 -- =======================================================
--- KART BOZUKLUKLARINI ÇÖZEN (AUTOMATIC SIZE) SİSTEMİ
+-- ÜST ARAMA ÇUBUĞU (Görseldeki gibi)
+-- =======================================================
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, -220, 0, 60)
+TopBar.Position = UDim2.new(0, 220, 0, 0)
+TopBar.BackgroundTransparency = 1
+TopBar.Parent = MainFrame
+
+local SearchBox = Instance.new("Frame")
+SearchBox.Size = UDim2.new(0, 200, 0, 32)
+SearchBox.Position = UDim2.new(1, -220, 0.5, -16)
+SearchBox.BackgroundColor3 = Theme.SidebarBg
+SearchBox.Parent = TopBar
+corner(SearchBox, 6)
+
+local SearchInput = Instance.new("TextBox")
+SearchInput.Size = UDim2.new(1, -20, 1, 0)
+SearchInput.Position = UDim2.new(0, 10, 0, 0)
+SearchInput.BackgroundTransparency = 1
+SearchInput.Text = "dingilherif"
+SearchInput.TextColor3 = Theme.TextPrimary
+SearchInput.TextSize = 13
+SearchInput.Font = Enum.Font.Gotham
+SearchInput.TextXAlignment = Enum.TextXAlignment.Left
+SearchInput.Parent = SearchBox
+
+-- =======================================================
+-- YENİ YAN MENÜ (SIDEBAR) SİSTEMİ
 -- =======================================================
 local Sidebar = Instance.new("Frame")
-Sidebar.Size = UDim2.new(0, 180, 1, 0)
+Sidebar.Size = UDim2.new(0, 210, 1, 0)
 Sidebar.BackgroundColor3 = Theme.SidebarBg
 Sidebar.Parent = MainFrame
 corner(Sidebar, 12)
 
-local HeaderBox = Instance.new("Frame")
-HeaderBox.Size = UDim2.new(1, -20, 0, 45)
-HeaderBox.Position = UDim2.new(0, 10, 0, 10)
-HeaderBox.BackgroundColor3 = Theme.CardBg
-HeaderBox.Parent = Sidebar
-corner(HeaderBox, 8)
+-- Menü ile içerik arasındaki ayrım çizgisi (Görseldeki gibi)
+local SidebarLine = Instance.new("Frame")
+SidebarLine.Size = UDim2.new(0, 1, 1, 0)
+SidebarLine.Position = UDim2.new(1, 0, 0, 0)
+SidebarLine.BackgroundColor3 = Theme.CardBg
+SidebarLine.BorderSizePixel = 0
+SidebarLine.Parent = Sidebar
+
+-- Profil / Başlık Kutusu (Görsel 15'teki "LN - Lenzo Menu" kısmı)
+local ProfileBox = Instance.new("Frame")
+ProfileBox.Size = UDim2.new(1, 40, 0, 50)
+ProfileBox.Position = UDim2.new(0, 15, 0, 15)
+ProfileBox.BackgroundColor3 = Theme.Bg
+ProfileBox.Parent = Sidebar
+corner(ProfileBox, 8)
+
+local AvatarCircle = Instance.new("Frame")
+AvatarCircle.Size = UDim2.new(0, 32, 0, 32)
+AvatarCircle.Position = UDim2.new(0, 10, 0.5, -16)
+AvatarCircle.BackgroundColor3 = Theme.ToggleOff
+AvatarCircle.Parent = ProfileBox
+corner(AvatarCircle, 16)
+
+local AvatarText = Instance.new("TextLabel")
+AvatarText.Size = UDim2.new(1, 0, 1, 0)
+AvatarText.BackgroundTransparency = 1
+AvatarText.Text = "ZH"
+AvatarText.TextColor3 = Theme.TextPrimary
+AvatarText.TextSize = 14
+AvatarText.Font = Enum.Font.GothamBold
+AvatarText.Parent = AvatarCircle
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -10, 1, 0)
-Title.Position = UDim2.new(0, 15, 0, 0)
+Title.Size = UDim2.new(1, -60, 0, 18)
+Title.Position = UDim2.new(0, 50, 0, 8)
 Title.BackgroundTransparency = 1
 Title.Text = "Zodiac Menu"
 Title.TextColor3 = Theme.TextPrimary
-Title.TextSize = 14
+Title.TextSize = 15
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = HeaderBox
+Title.Parent = ProfileBox
 
-local ContentScroll = Instance.new("ScrollingFrame")
-ContentScroll.Size = UDim2.new(1, -190, 1, -20)
-ContentScroll.Position = UDim2.new(0, 190, 0, 10)
-ContentScroll.BackgroundTransparency = 1
-ContentScroll.ScrollBarThickness = 2
-ContentScroll.Parent = MainFrame
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Size = UDim2.new(1, -60, 0, 14)
+SubTitle.Position = UDim2.new(0, 50, 0, 26)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "Panel Controls"
+SubTitle.TextColor3 = Theme.TextSecondary
+SubTitle.TextSize = 11
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubTitle.Parent = ProfileBox
 
-local LeftCol = Instance.new("Frame")
-LeftCol.Size = UDim2.new(0.49, 0, 0, 0)
-LeftCol.AutomaticSize = Enum.AutomaticSize.Y
-LeftCol.BackgroundTransparency = 1
-LeftCol.Parent = ContentScroll
-local LeftLayout = Instance.new("UIListLayout")
-LeftLayout.Padding = UDim.new(0, 10)
-LeftLayout.Parent = LeftCol
+-- Menü Kaydırma Alanı
+local MenuScroll = Instance.new("ScrollingFrame")
+MenuScroll.Size = UDim2.new(1, 0, 1, -85)
+MenuScroll.Position = UDim2.new(0, 0, 0, 85)
+MenuScroll.BackgroundTransparency = 1
+MenuScroll.ScrollBarThickness = 2
+MenuScroll.ScrollBarImageColor3 = Theme.Accent
+MenuScroll.Parent = Sidebar
 
-local RightCol = Instance.new("Frame")
-RightCol.Size = UDim2.new(0.49, 0, 0, 0)
-RightCol.Position = UDim2.new(0.51, 0, 0, 0)
-RightCol.AutomaticSize = Enum.AutomaticSize.Y
-RightCol.BackgroundTransparency = 1
-RightCol.Parent = ContentScroll
-local RightLayout = Instance.new("UIListLayout")
-RightLayout.Padding = UDim.new(0, 10)
-RightLayout.Parent = RightCol
+local MenuLayout = Instance.new("UIListLayout")
+MenuLayout.SortOrder = Enum.SortOrder.LayoutOrder
+MenuLayout.Padding = UDim.new(0, 4)
+MenuLayout.Parent = MenuScroll
 
-local function updateScroll()
-    ContentScroll.CanvasSize = UDim2.new(0, 0, 0, math.max(LeftLayout.AbsoluteContentSize.Y, RightLayout.AbsoluteContentSize.Y) + 20)
+local function updateMenuScroll()
+    MenuScroll.CanvasSize = UDim2.new(0, 0, 0, MenuLayout.AbsoluteContentSize.Y + 20)
 end
-LeftLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateScroll)
-RightLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateScroll)
+MenuLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateMenuScroll)
+
+local function createCategoryHeader(text)
+    local header = Instance.new("Frame")
+    header.Size = UDim2.new(1, 0, 0, 30)
+    header.BackgroundTransparency = 1
+    header.Parent = MenuScroll
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -25, 1, 0)
+    label.Position = UDim2.new(0, 25, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = string.upper(text)
+    label.TextColor3 = Theme.TextSecondary
+    label.TextSize = 11
+    label.Font = Enum.Font.Gotham
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = header
+end
+
+local Tabs = {}
+local TabFrames = {}
+
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Size = UDim2.new(1, -210, 1, -60)
+ContentContainer.Position = UDim2.new(0, 210, 0, 60)
+ContentContainer.BackgroundTransparency = 1
+ContentContainer.Parent = MainFrame
+
+local function createTab(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -20, 0, 36)
+    btn.Position = UDim2.new(0, 10, 0, 0)
+    btn.BackgroundColor3 = Theme.TabActiveBg
+    btn.BackgroundTransparency = 1 -- Varsayılan görünmez
+    btn.Text = ""
+    btn.Parent = MenuScroll
+    corner(btn, 6)
+    
+    -- Kenar Boşluğu için Padding eklentisi
+    local btnPad = Instance.new("UIPadding")
+    btnPad.PaddingLeft = UDim.new(0, 10)
+    btnPad.Parent = btn
+
+    local iconCircle = Instance.new("Frame")
+    iconCircle.Size = UDim2.new(0, 14, 0, 14)
+    iconCircle.Position = UDim2.new(0, 10, 0.5, -7)
+    iconCircle.BackgroundColor3 = Theme.TabInactive
+    iconCircle.Parent = btn
+    corner(iconCircle, 7)
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -35, 1, 0)
+    label.Position = UDim2.new(0, 35, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = name
+    label.TextColor3 = Theme.TabInactive
+    label.TextSize = 13
+    label.Font = Enum.Font.Gotham
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = btn
+
+    -- Bu sekmeye ait sayfa
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(1, -20, 1, -20)
+    page.Position = UDim2.new(0, 10, 0, 10)
+    page.BackgroundTransparency = 1
+    page.ScrollBarThickness = 2
+    page.Visible = false
+    page.Parent = ContentContainer
+    
+    local left = Instance.new("Frame")
+    left.Size = UDim2.new(0.49, 0, 0, 0); left.AutomaticSize = Enum.AutomaticSize.Y; left.BackgroundTransparency = 1; left.Parent = page
+    local leftLayout = Instance.new("UIListLayout"); leftLayout.Padding = UDim.new(0, 10); leftLayout.Parent = left
+    
+    local right = Instance.new("Frame")
+    right.Size = UDim2.new(0.49, 0, 0, 0); right.Position = UDim2.new(0.51, 0, 0, 0); right.AutomaticSize = Enum.AutomaticSize.Y; right.BackgroundTransparency = 1; right.Parent = page
+    local rightLayout = Instance.new("UIListLayout"); rightLayout.Padding = UDim.new(0, 10); rightLayout.Parent = right
+    
+    local function updatePageScroll()
+        page.CanvasSize = UDim2.new(0, 0, 0, math.max(leftLayout.AbsoluteContentSize.Y, rightLayout.AbsoluteContentSize.Y) + 20)
+    end
+    leftLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updatePageScroll)
+    rightLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updatePageScroll)
+
+    local tabData = {Btn = btn, Icon = iconCircle, Label = label, Page = page, Left = left, Right = right}
+    Tabs[name] = tabData
+
+    btn.MouseButton1Click:Connect(function()
+        for tName, data in pairs(Tabs) do
+            if tName == name then
+                data.Btn.BackgroundTransparency = 0
+                data.Icon.BackgroundColor3 = Theme.Accent
+                data.Label.TextColor3 = Theme.Accent
+                data.Page.Visible = true
+            else
+                data.Btn.BackgroundTransparency = 1
+                data.Icon.BackgroundColor3 = Theme.TabInactive
+                data.Label.TextColor3 = Theme.TabInactive
+                data.Page.Visible = false
+            end
+        end
+    end)
+
+    return tabData
+end
+
+-- Menü Öğelerini Oluşturma (Görsel 15 ile birebir aynı sıra)
+createCategoryHeader("Menu")
+createTab("MAIN")
+local espTab = createTab("ESP")
+createTab("Aimbot")
+createTab("Settings")
+createTab("Oyuncular")
+
+createCategoryHeader("Da Hood")
+createTab("Weapons")
+createTab("Locations")
+createTab("Misc")
+createTab("World")
+
+createCategoryHeader("Actions")
+-- (Boş bırakıldı, ileride eklenebilir)
+
+-- =======================================================
+-- ESP KARTLARI (Hiçbir şeye dokunulmadı, espTab içine eklendi)
+-- =======================================================
+local LeftCol = espTab.Left
+local RightCol = espTab.Right
 
 local function createCard(parentCol, category, titleText)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, 0, 0, 0)
-    card.AutomaticSize = Enum.AutomaticSize.Y -- Bozulmaları önleyen asıl ayar
+    card.AutomaticSize = Enum.AutomaticSize.Y
     card.BackgroundColor3 = Theme.CardBg
     card.Parent = parentCol
     corner(card, 8)
@@ -468,9 +502,6 @@ local function addSlider(parent, text, min, max, default, symbol, callback)
     callback(default)
 end
 
--- =======================================================
--- ESP AYARLARI VE OLUŞTURMA
--- =======================================================
 local ESP = {
     Enabled = false, TeamCheck = false, MaxDistance = 1000,
     Box = { Enabled = false, Style = "Corner", Outline = true, Filled = false, FillTrans = 0.5, Thickness = 1 },
@@ -480,7 +511,6 @@ local ESP = {
     Name = { Enabled = false, Mode = "DisplayName", ShowDist = false, Unit = "studs", TextSize = 14 }
 }
 
--- Kartlara Yükseklik Değeri (Height) Girmemize Artık Gerek Yok
 local mainEsp = createCard(LeftCol, "MAIN ESP", "Core Controls")
 addToggle(mainEsp, "ESP Enabled", false, function(v) ESP.Enabled = v end)
 addToggle(mainEsp, "Team Check", false, function(v) ESP.TeamCheck = v end)
@@ -522,8 +552,18 @@ addToggle(nameEsp, "Show Distance", true, function(v) ESP.Name.ShowDist = v end)
 addDropdown(nameEsp, "Distance Unit", {"studs", "meters"}, 1, function(v) ESP.Name.Unit = v end)
 addSlider(nameEsp, "Text Size", 10, 30, 14, "", function(v) ESP.Name.TextSize = v end)
 
+-- ESP Sekmesini Başlangıçta Aktif Yap
+for tName, data in pairs(Tabs) do
+    if tName == "ESP" then
+        data.Btn.BackgroundTransparency = 0
+        data.Icon.BackgroundColor3 = Theme.Accent
+        data.Label.TextColor3 = Theme.Accent
+        data.Page.Visible = true
+    end
+end
+
 -- =======================================================
--- ESP ÇİZİM MOTORU
+-- ESP ÇİZİM MOTORU (Değiştirilmedi)
 -- =======================================================
 local ESP_Drawings = {}
 local function createDrawings(player)
