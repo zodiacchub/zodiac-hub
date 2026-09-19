@@ -1,9 +1,10 @@
--- [[ ZODIAC HUB - V2 FULL ESP ENGINE & LENZO UI ]] --
+-- [[ ZODIAC HUB - V3 FULL ESP ENGINE + KEY SYSTEM ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
@@ -11,184 +12,6 @@ if CoreGui:FindFirstChild("ZodiacHubUI") then
     CoreGui.ZodiacHubUI:Destroy()
 end
 
--- =======================================================
--- ESP AYARLARI VE MOTORU
--- =======================================================
-local ESP = {
-    Enabled = false, TeamCheck = false, MaxDistance = 1000,
-    Box = { Enabled = false, Style = "Corner", Outline = true, Filled = false, FillTrans = 0.5, Thickness = 1 },
-    Tracer = { Enabled = false, Origin = "Bottom", Style = "Line", Thickness = 1, Fade = 1 },
-    Health = { Enabled = false, Style = "Bar", Side = "Left", Format = "HP", ShowDist = false, TextSize = 14 },
-    Skeleton = { Enabled = false, Color = Color3.new(1,1,1), Thickness = 1, Trans = 1 },
-    Name = { Enabled = false, Mode = "DisplayName", ShowDist = false, Unit = "studs", TextSize = 14 }
-}
-
-local ESP_Drawings = {}
-
-local function createDrawings(player)
-    local d = {
-        BoxOutline = Drawing.new("Square"), Box = Drawing.new("Square"), BoxFill = Drawing.new("Square"),
-        Tracer = Drawing.new("Line"),
-        HealthBg = Drawing.new("Line"), Health = Drawing.new("Line"), HealthText = Drawing.new("Text"),
-        NameText = Drawing.new("Text"),
-        Skeleton = {}
-    }
-    
-    -- Standart Ayarlar
-    d.BoxOutline.Color = Color3.new(0,0,0); d.BoxOutline.Thickness = 2.5; d.BoxOutline.Filled = false
-    d.Box.Color = Color3.new(1,1,1); d.Box.Filled = false
-    d.BoxFill.Color = Color3.fromRGB(76, 130, 246); d.BoxFill.Filled = true
-    d.Tracer.Color = Color3.new(1,1,1)
-    d.HealthBg.Color = Color3.new(0,0,0); d.HealthBg.Thickness = 4
-    d.Health.Thickness = 2
-    d.HealthText.Center = true; d.HealthText.Outline = true; d.HealthText.Color = Color3.new(1,1,1)
-    d.NameText.Center = true; d.NameText.Outline = true; d.NameText.Color = Color3.new(1,1,1)
-
-    for i = 1, 15 do
-        local line = Drawing.new("Line")
-        line.Color = Color3.new(1,1,1)
-        table.insert(d.Skeleton, line)
-    end
-
-    ESP_Drawings[player] = d
-end
-
-local function removeDrawings(player)
-    if ESP_Drawings[player] then
-        for k, v in pairs(ESP_Drawings[player]) do
-            if type(v) == "table" then
-                for _, line in pairs(v) do line:Remove() end
-            else
-                v:Remove()
-            end
-        end
-        ESP_Drawings[player] = nil
-    end
-end
-Players.PlayerRemoving:Connect(removeDrawings)
-
-local R15_Bones = {
-    {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"},
-    {"UpperTorso", "LeftUpperArm"}, {"LeftUpperArm", "LeftLowerArm"}, {"LeftLowerArm", "LeftHand"},
-    {"UpperTorso", "RightUpperArm"}, {"RightUpperArm", "RightLowerArm"}, {"RightLowerArm", "RightHand"},
-    {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"}, {"LeftLowerLeg", "LeftFoot"},
-    {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"}
-}
-local R6_Bones = {
-    {"Head", "Torso"}, {"Torso", "Left Arm"}, {"Torso", "Right Arm"}, {"Torso", "Left Leg"}, {"Torso", "Right Leg"}
-}
-
-RunService.RenderStepped:Connect(function()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            if not ESP_Drawings[player] then createDrawings(player) end
-            local d = ESP_Drawings[player]
-            local char = player.Character
-            local valid = char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0
-            local show = false
-
-            if ESP.Enabled and valid then
-                local hrp = char.HumanoidRootPart
-                local dist = (Camera.CFrame.Position - hrp.Position).Magnitude
-                if (not ESP.TeamCheck or player.Team ~= LocalPlayer.Team) and dist <= ESP.MaxDistance then
-                    local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-                    if onScreen then
-                        show = true
-                        local topPos = Camera:WorldToViewportPoint(char:FindFirstChild("Head") and char.Head.Position + Vector3.new(0,0.5,0) or hrp.Position + Vector3.new(0,2,0))
-                        local btmPos = Camera:WorldToViewportPoint(hrp.Position - Vector3.new(0,3,0))
-                        local h = math.abs(topPos.Y - btmPos.Y)
-                        local w = h * 0.6
-                        local boxX, boxY = pos.X - w/2, topPos.Y
-
-                        -- BOX
-                        if ESP.Box.Enabled then
-                            d.BoxOutline.Visible = ESP.Box.Outline; d.BoxOutline.Position = Vector2.new(boxX, boxY); d.BoxOutline.Size = Vector2.new(w, h)
-                            d.Box.Visible = true; d.Box.Position = Vector2.new(boxX, boxY); d.Box.Size = Vector2.new(w, h); d.Box.Thickness = ESP.Box.Thickness
-                            d.BoxFill.Visible = ESP.Box.Filled; d.BoxFill.Position = Vector2.new(boxX, boxY); d.BoxFill.Size = Vector2.new(w, h); d.BoxFill.Transparency = ESP.Box.FillTrans
-                        else
-                            d.Box.Visible = false; d.BoxOutline.Visible = false; d.BoxFill.Visible = false
-                        end
-
-                        -- TRACER
-                        if ESP.Tracer.Enabled then
-                            d.Tracer.Visible = true
-                            d.Tracer.Thickness = ESP.Tracer.Thickness
-                            d.Tracer.Transparency = ESP.Tracer.Fade
-                            local origin = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y)
-                            if ESP.Tracer.Origin == "Center" then origin = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-                            elseif ESP.Tracer.Origin == "Mouse" then origin = UserInputService:GetMouseLocation() end
-                            d.Tracer.From = origin; d.Tracer.To = Vector2.new(pos.X, btmPos.Y)
-                        else d.Tracer.Visible = false end
-
-                        -- HEALTH
-                        if ESP.Health.Enabled then
-                            local hp, maxHp = char.Humanoid.Health, char.Humanoid.MaxHealth
-                            local hpPct = hp / maxHp
-                            d.HealthBg.Visible = true; d.Health.Visible = true
-                            local barX = ESP.Health.Side == "Left" and (boxX - 6) or (boxX + w + 6)
-                            d.HealthBg.From = Vector2.new(barX, boxY + h); d.HealthBg.To = Vector2.new(barX, boxY)
-                            d.Health.From = Vector2.new(barX, boxY + h); d.Health.To = Vector2.new(barX, boxY + h - (h * hpPct))
-                            d.Health.Color = Color3.fromRGB(255 - (hpPct*255), hpPct*255, 0)
-                            
-                            if ESP.Health.Format ~= "None" then
-                                d.HealthText.Visible = true
-                                d.HealthText.Size = ESP.Health.TextSize
-                                d.HealthText.Position = Vector2.new(barX - 15, d.Health.To.Y - 5)
-                                local txt = ESP.Health.Format == "HP" and math.floor(hp) or math.floor(hpPct*100).."%"
-                                if ESP.Health.ShowDist then txt = txt .. " | " .. math.floor(dist) end
-                                d.HealthText.Text = txt
-                            else d.HealthText.Visible = false end
-                        else d.HealthBg.Visible = false; d.Health.Visible = false; d.HealthText.Visible = false end
-
-                        -- NAME
-                        if ESP.Name.Enabled then
-                            d.NameText.Visible = true
-                            d.NameText.Size = ESP.Name.TextSize
-                            d.NameText.Position = Vector2.new(pos.X, boxY - ESP.Name.TextSize - 4)
-                            local nTxt = ESP.Name.Mode == "DisplayName" and player.DisplayName or player.Name
-                            if ESP.Name.ShowDist then nTxt = nTxt .. " ["..math.floor(dist).. (ESP.Name.Unit == "studs" and "s" or "m") .."]" end
-                            d.NameText.Text = nTxt
-                        else d.NameText.Visible = false end
-
-                        -- SKELETON
-                        if ESP.Skeleton.Enabled then
-                            local isR15 = char:FindFirstChild("UpperTorso") ~= nil
-                            local bones = isR15 and R15_Bones or R6_Bones
-                            for i, line in ipairs(d.Skeleton) do
-                                local bData = bones[i]
-                                if bData and char:FindFirstChild(bData[1]) and char:FindFirstChild(bData[2]) then
-                                    local p1, s1 = Camera:WorldToViewportPoint(char[bData[1]].Position)
-                                    local p2, s2 = Camera:WorldToViewportPoint(char[bData[2]].Position)
-                                    if s1 and s2 then
-                                        line.Visible = true
-                                        line.From = Vector2.new(p1.X, p1.Y)
-                                        line.To = Vector2.new(p2.X, p2.Y)
-                                        line.Color = ESP.Skeleton.Color
-                                        line.Thickness = ESP.Skeleton.Thickness
-                                        line.Transparency = ESP.Skeleton.Trans
-                                    else line.Visible = false end
-                                else line.Visible = false end
-                            end
-                        else
-                            for _, line in ipairs(d.Skeleton) do line.Visible = false end
-                        end
-                    end
-                end
-            end
-
-            if not show then
-                d.Box.Visible = false; d.BoxOutline.Visible = false; d.BoxFill.Visible = false
-                d.Tracer.Visible = false; d.HealthBg.Visible = false; d.Health.Visible = false; d.HealthText.Visible = false
-                d.NameText.Visible = false
-                for _, line in ipairs(d.Skeleton) do line.Visible = false end
-            end
-        end
-    end
-end)
-
--- =======================================================
--- UI TASARIMI (LENZO MATCH)
--- =======================================================
 local ZodiacGui = Instance.new("ScreenGui")
 ZodiacGui.Name = "ZodiacHubUI"
 ZodiacGui.ResetOnSpawn = false
@@ -201,31 +24,194 @@ local Theme = {
     Accent = Color3.fromRGB(76, 130, 246),
     TextPrimary = Color3.fromRGB(240, 242, 250),
     TextSecondary = Color3.fromRGB(130, 135, 155),
-    InputBg = Color3.fromRGB(15, 17, 26),
+    InputBg = Color3.fromRGB(10, 11, 18),
     ToggleOff = Color3.fromRGB(38, 43, 62)
 }
 
 local function corner(p, r) local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, r or 8); c.Parent = p end
 
+-- =======================================================
+-- 1) LOADING EKRANI
+-- =======================================================
+local LoadFrame = Instance.new("Frame")
+LoadFrame.Size = UDim2.new(0, 300, 0, 120)
+LoadFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
+LoadFrame.BackgroundColor3 = Theme.Bg
+LoadFrame.Parent = ZodiacGui
+corner(LoadFrame, 12)
+
+local LoadTitle = Instance.new("TextLabel")
+LoadTitle.Size = UDim2.new(1, 0, 0, 40)
+LoadTitle.Position = UDim2.new(0, 0, 0, 20)
+LoadTitle.BackgroundTransparency = 1
+LoadTitle.Text = "Z O D I A C"
+LoadTitle.TextColor3 = Theme.TextPrimary
+LoadTitle.TextSize = 24
+LoadTitle.Font = Enum.Font.GothamBold
+LoadTitle.Parent = LoadFrame
+
+local LoadBarBg = Instance.new("Frame")
+LoadBarBg.Size = UDim2.new(0, 240, 0, 6)
+LoadBarBg.Position = UDim2.new(0.5, -120, 0, 80)
+LoadBarBg.BackgroundColor3 = Theme.CardBg
+LoadBarBg.Parent = LoadFrame
+corner(LoadBarBg, 3)
+
+local LoadBarFill = Instance.new("Frame")
+LoadBarFill.Size = UDim2.new(0, 0, 1, 0)
+LoadBarFill.BackgroundColor3 = Theme.Accent
+LoadBarFill.Parent = LoadBarBg
+corner(LoadBarFill, 3)
+
+-- =======================================================
+-- 2) KEY SİSTEMİ EKRANI
+-- =======================================================
+local KeyFrame = Instance.new("Frame")
+KeyFrame.Size = UDim2.new(0, 320, 0, 180)
+KeyFrame.Position = UDim2.new(0.5, -160, 0.5, -90)
+KeyFrame.BackgroundColor3 = Theme.Bg
+KeyFrame.Visible = false
+KeyFrame.Parent = ZodiacGui
+corner(KeyFrame, 12)
+
+local KeyTitle = Instance.new("TextLabel")
+KeyTitle.Size = UDim2.new(1, 0, 0, 40)
+KeyTitle.Position = UDim2.new(0, 0, 0, 15)
+KeyTitle.BackgroundTransparency = 1
+KeyTitle.Text = "Authentication"
+KeyTitle.TextColor3 = Theme.TextPrimary
+KeyTitle.TextSize = 18
+KeyTitle.Font = Enum.Font.GothamBold
+KeyTitle.Parent = KeyFrame
+
+local KeySub = Instance.new("TextLabel")
+KeySub.Size = UDim2.new(1, 0, 0, 20)
+KeySub.Position = UDim2.new(0, 0, 0, 40)
+KeySub.BackgroundTransparency = 1
+KeySub.Text = "Lütfen key giriniz"
+KeySub.TextColor3 = Theme.TextSecondary
+KeySub.TextSize = 12
+KeySub.Font = Enum.Font.Gotham
+KeySub.Parent = KeyFrame
+
+local InputBg = Instance.new("Frame")
+InputBg.Size = UDim2.new(0, 260, 0, 40)
+InputBg.Position = UDim2.new(0.5, -130, 0, 75)
+InputBg.BackgroundColor3 = Theme.InputBg
+InputBg.Parent = KeyFrame
+corner(InputBg, 6)
+
+-- Gerçek TextBox (Görünmez yazılar)
+local KeyInput = Instance.new("TextBox")
+KeyInput.Size = UDim2.new(1, 0, 1, 0)
+KeyInput.BackgroundTransparency = 1
+KeyInput.Text = ""
+KeyInput.TextColor3 = Theme.TextPrimary
+KeyInput.TextTransparency = 1 -- Gerçek yazıyı gizler
+KeyInput.TextSize = 14
+KeyInput.Font = Enum.Font.Gotham
+KeyInput.ClearTextOnFocus = false
+KeyInput.Parent = InputBg
+
+-- Sahte TextLabel (Noktaları gösterir)
+local MaskedLabel = Instance.new("TextLabel")
+MaskedLabel.Size = UDim2.new(1, 0, 1, 0)
+MaskedLabel.BackgroundTransparency = 1
+MaskedLabel.Text = "Key: ZodiacHub"
+MaskedLabel.TextColor3 = Theme.TextSecondary
+MaskedLabel.TextSize = 16
+MaskedLabel.Font = Enum.Font.Gotham
+MaskedLabel.Parent = InputBg
+
+-- Yazı yazıldıkça noktaya çevirme işlemi
+KeyInput:GetPropertyChangedSignal("Text"):Connect(function()
+    if KeyInput.Text == "" then
+        MaskedLabel.Text = "Key: ZodiacHub"
+        MaskedLabel.TextColor3 = Theme.TextSecondary
+    else
+        MaskedLabel.Text = string.rep("•", #KeyInput.Text)
+        MaskedLabel.TextColor3 = Theme.TextPrimary
+    end
+end)
+
+local VerifyBtn = Instance.new("TextButton")
+VerifyBtn.Size = UDim2.new(0, 260, 0, 36)
+VerifyBtn.Position = UDim2.new(0.5, -130, 0, 125)
+VerifyBtn.BackgroundColor3 = Theme.Accent
+VerifyBtn.Text = "Giriş Yap"
+VerifyBtn.TextColor3 = Color3.fromRGB(255,255,255)
+VerifyBtn.TextSize = 14
+VerifyBtn.Font = Enum.Font.GothamBold
+VerifyBtn.Parent = KeyFrame
+corner(VerifyBtn, 6)
+
+-- =======================================================
+-- 3) ANA MENÜ (Önceden gizli olacak)
+-- =======================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 840, 0, 520)
 MainFrame.Position = UDim2.new(0.5, -420, 0.5, -260)
 MainFrame.BackgroundColor3 = Theme.Bg
+MainFrame.Visible = false -- Key girilmeden açılmaz
 MainFrame.Parent = ZodiacGui
 corner(MainFrame, 12)
 
--- Sürükleme
-local dragging, dragInput, dragStart, startPos
-MainFrame.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; dragStart = input.Position; startPos = MainFrame.Position end end)
-UserInputService.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
-    if input == dragInput and dragging then
-        local d = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+-- Sürükleme Sistemi (MainFrame ve KeyFrame için)
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; dragStart = input.Position; startPos = frame.Position end end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+        if input == dragInput and dragging then
+            local d = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+end
+makeDraggable(MainFrame)
+makeDraggable(KeyFrame)
+
+-- =======================================================
+-- GEÇİŞ ANİMASYONLARI (LOADING -> KEY -> MAINFRAME)
+-- =======================================================
+task.spawn(function()
+    -- Loading Bar'ı doldur
+    local tween = TweenService:Create(LoadBarFill, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
+    tween:Play()
+    tween.Completed:Wait()
+    task.wait(0.3)
+    
+    -- LoadFrame'i kaybet, KeyFrame'i getir
+    LoadFrame.Visible = false
+    KeyFrame.Visible = true
+end)
+
+VerifyBtn.MouseButton1Click:Connect(function()
+    if KeyInput.Text == "ZodiacHub" then
+        -- Key Doğru!
+        VerifyBtn.Text = "Başarılı!"
+        VerifyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Yeşil renk
+        task.wait(0.5)
+        KeyFrame.Visible = false
+        MainFrame.Visible = true
+    else
+        -- Key Yanlış!
+        local oldColor = InputBg.BackgroundColor3
+        MaskedLabel.Text = "Yanlış Key!"
+        MaskedLabel.TextColor3 = Color3.fromRGB(231, 76, 60)
+        InputBg.BackgroundColor3 = Color3.fromRGB(50, 10, 10)
+        task.wait(1)
+        KeyInput.Text = ""
+        InputBg.BackgroundColor3 = oldColor
     end
 end)
-UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
 
+-- =======================================================
+-- UI TASARIMI (LENZO MATCH) & ESP SİSTEMİ
+-- =======================================================
+
+-- Sol Menü (Sidebar)
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0, 180, 1, 0)
 Sidebar.BackgroundColor3 = Theme.SidebarBg
@@ -250,7 +236,7 @@ Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = HeaderBox
 
--- İÇERİK KISMI (2 SÜTUNLU YAPI - KARTLARIN DÜZGÜN OTURMASI İÇİN)
+-- İçerik Kartları
 local ContentScroll = Instance.new("ScrollingFrame")
 ContentScroll.Size = UDim2.new(1, -190, 1, -20)
 ContentScroll.Position = UDim2.new(0, 190, 0, 10)
@@ -326,7 +312,6 @@ local function createCard(parentCol, category, titleText, height)
     return container
 end
 
--- UI BİLEŞENLERİ (LENZO MATCH)
 local function addToggle(parent, text, default, callback)
     local state = default
     local frame = Instance.new("TextButton")
@@ -361,8 +346,8 @@ local function addToggle(parent, text, default, callback)
 
     frame.MouseButton1Click:Connect(function()
         state = not state
-        game:GetService("TweenService"):Create(toggleBg, TweenInfo.new(0.2), {BackgroundColor3 = state and Theme.Accent or Theme.ToggleOff}):Play()
-        game:GetService("TweenService"):Create(knob, TweenInfo.new(0.2), {Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}):Play()
+        TweenService:Create(toggleBg, TweenInfo.new(0.2), {BackgroundColor3 = state and Theme.Accent or Theme.ToggleOff}):Play()
+        TweenService:Create(knob, TweenInfo.new(0.2), {Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}):Play()
         callback(state)
     end)
     callback(state)
@@ -476,10 +461,18 @@ local function addSlider(parent, text, min, max, default, symbol, callback)
 end
 
 -- =======================================================
--- KARTLAR VE BAĞLANTILAR (TAM FOTOĞRAFDAKİ GİBİ)
+-- ESP AYARLARI VE MOTORU
 -- =======================================================
+local ESP = {
+    Enabled = false, TeamCheck = false, MaxDistance = 1000,
+    Box = { Enabled = false, Style = "Corner", Outline = true, Filled = false, FillTrans = 0.5, Thickness = 1 },
+    Tracer = { Enabled = false, Origin = "Bottom", Style = "Line", Thickness = 1, Fade = 1 },
+    Health = { Enabled = false, Style = "Bar", Side = "Left", Format = "HP", ShowDist = false, TextSize = 14 },
+    Skeleton = { Enabled = false, Color = Color3.new(1,1,1), Thickness = 1, Trans = 1 },
+    Name = { Enabled = false, Mode = "DisplayName", ShowDist = false, Unit = "studs", TextSize = 14 }
+}
 
--- SOL SÜTUN
+-- (Arayüz Kartlarını Oluşturma)
 local mainEsp = createCard(LeftCol, "MAIN ESP", "Core Controls", 140)
 addToggle(mainEsp, "ESP Enabled", false, function(v) ESP.Enabled = v end)
 addToggle(mainEsp, "Team Check", false, function(v) ESP.TeamCheck = v end)
@@ -494,13 +487,10 @@ addSlider(tracerEsp, "Tracer Fade", 10, 100, 75, "%", function(v) ESP.Tracer.Fad
 
 local skelEsp = createCard(LeftCol, "SKELETON", "Bone Overlay", 160)
 addToggle(skelEsp, "Skeleton ESP", false, function(v) ESP.Skeleton.Enabled = v end)
-addDropdown(skelEsp, "Skel. Color", {"White", "Red", "Blue"}, 1, function(v) 
-    ESP.Skeleton.Color = v == "White" and Color3.new(1,1,1) or (v == "Red" and Color3.new(1,0,0) or Color3.new(0,0,1))
-end)
+addDropdown(skelEsp, "Skel. Color", {"White", "Red", "Blue"}, 1, function(v) ESP.Skeleton.Color = v == "White" and Color3.new(1,1,1) or (v == "Red" and Color3.new(1,0,0) or Color3.new(0,0,1)) end)
 addSlider(skelEsp, "Line Thickness", 1, 5, 2, "", function(v) ESP.Skeleton.Thickness = v end)
 addSlider(skelEsp, "Transparency", 10, 100, 100, "%", function(v) ESP.Skeleton.Trans = v / 100 end)
 
--- SAĞ SÜTUN
 local boxEsp = createCard(RightCol, "BOX ESP", "Shape + Outline", 240)
 addToggle(boxEsp, "Box ESP", false, function(v) ESP.Box.Enabled = v end)
 addDropdown(boxEsp, "Box Style", {"Corner", "Full"}, 1, function(v) ESP.Box.Style = v end)
@@ -523,3 +513,118 @@ addDropdown(nameEsp, "Name Mode", {"DisplayName", "Username"}, 1, function(v) ES
 addToggle(nameEsp, "Show Distance", true, function(v) ESP.Name.ShowDist = v end)
 addDropdown(nameEsp, "Distance Unit", {"studs", "meters"}, 1, function(v) ESP.Name.Unit = v end)
 addSlider(nameEsp, "Text Size", 10, 30, 14, "", function(v) ESP.Name.TextSize = v end)
+
+-- ESP Çizim Motoru
+local ESP_Drawings = {}
+local function createDrawings(player)
+    local d = { BoxOutline = Drawing.new("Square"), Box = Drawing.new("Square"), BoxFill = Drawing.new("Square"), Tracer = Drawing.new("Line"), HealthBg = Drawing.new("Line"), Health = Drawing.new("Line"), HealthText = Drawing.new("Text"), NameText = Drawing.new("Text"), Skeleton = {} }
+    d.BoxOutline.Color = Color3.new(0,0,0); d.BoxOutline.Thickness = 2.5; d.BoxOutline.Filled = false
+    d.Box.Color = Color3.new(1,1,1); d.Box.Filled = false
+    d.BoxFill.Color = Color3.fromRGB(76, 130, 246); d.BoxFill.Filled = true
+    d.Tracer.Color = Color3.new(1,1,1)
+    d.HealthBg.Color = Color3.new(0,0,0); d.HealthBg.Thickness = 4
+    d.Health.Thickness = 2
+    d.HealthText.Center = true; d.HealthText.Outline = true; d.HealthText.Color = Color3.new(1,1,1)
+    d.NameText.Center = true; d.NameText.Outline = true; d.NameText.Color = Color3.new(1,1,1)
+    for i = 1, 15 do local line = Drawing.new("Line"); line.Color = Color3.new(1,1,1); table.insert(d.Skeleton, line) end
+    ESP_Drawings[player] = d
+end
+local function removeDrawings(player)
+    if ESP_Drawings[player] then
+        for _, v in pairs(ESP_Drawings[player]) do if type(v) == "table" then for _, line in pairs(v) do line:Remove() end else v:Remove() end end
+        ESP_Drawings[player] = nil
+    end
+end
+Players.PlayerRemoving:Connect(removeDrawings)
+
+local R15_Bones = { {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"}, {"UpperTorso", "LeftUpperArm"}, {"LeftUpperArm", "LeftLowerArm"}, {"LeftLowerArm", "LeftHand"}, {"UpperTorso", "RightUpperArm"}, {"RightUpperArm", "RightLowerArm"}, {"RightLowerArm", "RightHand"}, {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"}, {"LeftLowerLeg", "LeftFoot"}, {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"} }
+local R6_Bones = { {"Head", "Torso"}, {"Torso", "Left Arm"}, {"Torso", "Right Arm"}, {"Torso", "Left Leg"}, {"Torso", "Right Leg"} }
+
+RunService.RenderStepped:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            if not ESP_Drawings[player] then createDrawings(player) end
+            local d = ESP_Drawings[player]
+            local char = player.Character
+            local valid = char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0
+            local show = false
+
+            if ESP.Enabled and valid then
+                local hrp = char.HumanoidRootPart
+                local dist = (Camera.CFrame.Position - hrp.Position).Magnitude
+                if (not ESP.TeamCheck or player.Team ~= LocalPlayer.Team) and dist <= ESP.MaxDistance then
+                    local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+                    if onScreen then
+                        show = true
+                        local topPos = Camera:WorldToViewportPoint(char:FindFirstChild("Head") and char.Head.Position + Vector3.new(0,0.5,0) or hrp.Position + Vector3.new(0,2,0))
+                        local btmPos = Camera:WorldToViewportPoint(hrp.Position - Vector3.new(0,3,0))
+                        local h = math.abs(topPos.Y - btmPos.Y)
+                        local w = h * 0.6
+                        local boxX, boxY = pos.X - w/2, topPos.Y
+
+                        if ESP.Box.Enabled then
+                            d.BoxOutline.Visible = ESP.Box.Outline; d.BoxOutline.Position = Vector2.new(boxX, boxY); d.BoxOutline.Size = Vector2.new(w, h)
+                            d.Box.Visible = true; d.Box.Position = Vector2.new(boxX, boxY); d.Box.Size = Vector2.new(w, h); d.Box.Thickness = ESP.Box.Thickness
+                            d.BoxFill.Visible = ESP.Box.Filled; d.BoxFill.Position = Vector2.new(boxX, boxY); d.BoxFill.Size = Vector2.new(w, h); d.BoxFill.Transparency = ESP.Box.FillTrans
+                        else d.Box.Visible = false; d.BoxOutline.Visible = false; d.BoxFill.Visible = false end
+
+                        if ESP.Tracer.Enabled then
+                            d.Tracer.Visible = true; d.Tracer.Thickness = ESP.Tracer.Thickness; d.Tracer.Transparency = ESP.Tracer.Fade
+                            local origin = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y)
+                            if ESP.Tracer.Origin == "Center" then origin = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+                            elseif ESP.Tracer.Origin == "Mouse" then origin = UserInputService:GetMouseLocation() end
+                            d.Tracer.From = origin; d.Tracer.To = Vector2.new(pos.X, btmPos.Y)
+                        else d.Tracer.Visible = false end
+
+                        if ESP.Health.Enabled then
+                            local hp, maxHp = char.Humanoid.Health, char.Humanoid.MaxHealth
+                            local hpPct = hp / maxHp
+                            d.HealthBg.Visible = true; d.Health.Visible = true
+                            local barX = ESP.Health.Side == "Left" and (boxX - 6) or (boxX + w + 6)
+                            d.HealthBg.From = Vector2.new(barX, boxY + h); d.HealthBg.To = Vector2.new(barX, boxY)
+                            d.Health.From = Vector2.new(barX, boxY + h); d.Health.To = Vector2.new(barX, boxY + h - (h * hpPct))
+                            d.Health.Color = Color3.fromRGB(255 - (hpPct*255), hpPct*255, 0)
+                            
+                            if ESP.Health.Format ~= "None" then
+                                d.HealthText.Visible = true; d.HealthText.Size = ESP.Health.TextSize; d.HealthText.Position = Vector2.new(barX - 15, d.Health.To.Y - 5)
+                                local txt = ESP.Health.Format == "HP" and math.floor(hp) or math.floor(hpPct*100).."%"
+                                if ESP.Health.ShowDist then txt = txt .. " | " .. math.floor(dist) end
+                                d.HealthText.Text = txt
+                            else d.HealthText.Visible = false end
+                        else d.HealthBg.Visible = false; d.Health.Visible = false; d.HealthText.Visible = false end
+
+                        if ESP.Name.Enabled then
+                            d.NameText.Visible = true; d.NameText.Size = ESP.Name.TextSize; d.NameText.Position = Vector2.new(pos.X, boxY - ESP.Name.TextSize - 4)
+                            local nTxt = ESP.Name.Mode == "DisplayName" and player.DisplayName or player.Name
+                            if ESP.Name.ShowDist then nTxt = nTxt .. " ["..math.floor(dist).. (ESP.Name.Unit == "studs" and "s" or "m") .."]" end
+                            d.NameText.Text = nTxt
+                        else d.NameText.Visible = false end
+
+                        if ESP.Skeleton.Enabled then
+                            local isR15 = char:FindFirstChild("UpperTorso") ~= nil
+                            local bones = isR15 and R15_Bones or R6_Bones
+                            for i, line in ipairs(d.Skeleton) do
+                                local bData = bones[i]
+                                if bData and char:FindFirstChild(bData[1]) and char:FindFirstChild(bData[2]) then
+                                    local p1, s1 = Camera:WorldToViewportPoint(char[bData[1]].Position)
+                                    local p2, s2 = Camera:WorldToViewportPoint(char[bData[2]].Position)
+                                    if s1 and s2 then
+                                        line.Visible = true; line.From = Vector2.new(p1.X, p1.Y); line.To = Vector2.new(p2.X, p2.Y)
+                                        line.Color = ESP.Skeleton.Color; line.Thickness = ESP.Skeleton.Thickness; line.Transparency = ESP.Skeleton.Trans
+                                    else line.Visible = false end
+                                else line.Visible = false end
+                            end
+                        else for _, line in ipairs(d.Skeleton) do line.Visible = false end end
+                    end
+                end
+            end
+
+            if not show then
+                d.Box.Visible = false; d.BoxOutline.Visible = false; d.BoxFill.Visible = false
+                d.Tracer.Visible = false; d.HealthBg.Visible = false; d.Health.Visible = false; d.HealthText.Visible = false
+                d.NameText.Visible = false
+                for _, line in ipairs(d.Skeleton) do line.Visible = false end
+            end
+        end
+    end
+end)
